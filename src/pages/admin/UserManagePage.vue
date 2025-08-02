@@ -17,7 +17,7 @@
     <a-table
       :columns="columns"
       :data-source="data"
-      :pagination= "pagination"
+      :pagination="pagination"
       @change="doTableChange"
     >
       <template #bodyCell="{ column, record }">
@@ -42,11 +42,10 @@
     </a-table>
   </div>
 </template>
-
-<script setup lang="ts">
+<script lang="ts" setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import { message } from 'ant-design-vue'
 import { deleteUser, listUserVoByPage } from '@/api/userController.ts'
+import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
 
 const columns = [
@@ -84,7 +83,7 @@ const columns = [
   },
 ]
 
-// 数据
+// 展示的数据
 const data = ref<API.UserVO[]>([])
 const total = ref(0)
 
@@ -107,7 +106,25 @@ const fetchData = async () => {
   }
 }
 
-// 获取数据
+// 分页参数
+const pagination = computed(() => {
+  return {
+    current: searchParams.pageNum ?? 1,
+    pageSize: searchParams.pageSize ?? 10,
+    total: total.value,
+    showSizeChanger: true,
+    showTotal: (total: number) => `共 ${total} 条`,
+  }
+})
+
+// 表格分页变化时的操作
+const doTableChange = (page: { current: number; pageSize: number }) => {
+  searchParams.pageNum = page.current
+  searchParams.pageSize = page.pageSize
+  fetchData()
+}
+
+// 搜索数据
 const doSearch = () => {
   // 重置页码
   searchParams.pageNum = 1
@@ -123,28 +140,10 @@ const doDelete = async (id: string) => {
   if (res.data.code === 0) {
     message.success('删除成功')
     // 刷新数据
-    await fetchData()
+    fetchData()
   } else {
     message.error('删除失败')
   }
-}
-
-// 分页参数
-const pagination = computed(() => {
-  return {
-    current: searchParams.pageNum ?? 1,
-    pageSize: searchParams.pageSize ?? 10,
-    total: total.value,
-    showSizeChanger: true,
-    showTotal: (total: number) => `共 ${total} 条`,
-  }
-})
-
-// 表格变化处理
-const doTableChange = (page: any) => {
-  searchParams.pageNum = page.current
-  searchParams.pageSize = page.pageSize
-  fetchData()
 }
 
 // 页面加载时请求一次
@@ -154,6 +153,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
+#userManagePage {
+  padding: 24px;
+  background: white;
+  margin-top: 16px;
+}
 </style>
-

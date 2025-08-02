@@ -51,8 +51,11 @@
 import { computed, h, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { type MenuProps, message } from 'ant-design-vue'
-import HomeOutlined from "@ant-design/icons-vue/lib/icons/HomeOutlined"
+import { useLoginUserStore } from '@/stores/loginUser.ts'
+import { userLogout } from '@/api/userController.ts'
+import { LogoutOutlined, HomeOutlined } from '@ant-design/icons-vue'
 
+const loginUserStore = useLoginUserStore()
 const router = useRouter()
 // 当前选中菜单
 const selectedKeys = ref<string[]>(['/'])
@@ -73,6 +76,11 @@ const originItems = [
     key: '/admin/userManage',
     label: '用户管理',
     title: '用户管理',
+  },
+  {
+    key: '/admin/appManage',
+    label: '应用管理',
+    title: '应用管理',
   },
   {
     key: 'others',
@@ -108,21 +116,7 @@ const handleMenuClick: MenuProps['onClick'] = (e) => {
   }
 }
 
-const loginUserStore = useLoginUserStore()
-
-// HTML 展示数据
-{
-  {
-    JSON.stringify(loginUserStore.loginUser)
-  }
-}
-
-// JS 中引入 Store
-import { useLoginUserStore } from '@/stores/loginUser.ts'
-import { LogoutOutlined } from '@ant-design/icons-vue'
-import { userLogout } from '@/api/userController.ts'
-
-// 用户注销
+// 退出登录
 const doLogout = async () => {
   const res = await userLogout()
   if (res.data.code === 0) {
